@@ -72,6 +72,17 @@ class MainViewController: UIViewController {
             recipesButton.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
             recipesButton.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
         ])
+        
+        ingredientsButton.addTarget(self, action: #selector(onTapIngredients), for: .touchUpInside)
+        recipesButton.addTarget(self, action: #selector(onTapRecipes), for: .touchUpInside)
+    }
+    
+    @objc private func onTapIngredients() {
+        navigationController?.pushViewController(IngredientsListViewController(), animated: true)
+    }
+    
+    @objc private func onTapRecipes() {
+        
     }
     
     private static func createMainButtonConfig(title: String, icon: String) -> UIButton.Configuration {
