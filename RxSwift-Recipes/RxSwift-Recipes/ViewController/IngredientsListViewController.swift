@@ -12,6 +12,7 @@ class IngredientsListViewController: UIViewController {
 
     private var tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
     private var dataSource: UITableViewDiffableDataSource<Int, RecipeIngredient>!
+    private let ingredientDao = RecipeIngredientDAO()
 
     private var ingredients: [RecipeIngredient] = []
 
@@ -68,16 +69,14 @@ class IngredientsListViewController: UIViewController {
     }
     
     private func fetchIngredients() {
-        let dao = RecipeIngredientDAO()
-        ingredients = dao.fetchAll()
+        ingredients = ingredientDao.fetchAll()
         applySnapshot()
     }
     
     @objc private func didTapAddButton() {
         let addIngredientVC = AddIngredientViewController { [weak self] newIngredient in
             guard let self = self else { return }
-            let dao = RecipeIngredientDAO()
-            if let insertedIngredient = dao.insert(name: newIngredient) {
+            if let insertedIngredient = ingredientDao.insert(name: newIngredient) {
                 self.ingredients.append(insertedIngredient)
                 self.applySnapshot()
             }
@@ -96,8 +95,15 @@ class IngredientsListViewController: UIViewController {
 extension IngredientsListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return nil }
+        
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
-            self?.deleteIngredient(at: indexPath)
+            guard let self = self else { return }
+            
+            if ingredientDao.delete(ingredient: ingredient) {
+                self.ingredients.removeAll { $0 == ingredient }
+                self.applySnapshot()
+            }
             completion(true)
         }
         
