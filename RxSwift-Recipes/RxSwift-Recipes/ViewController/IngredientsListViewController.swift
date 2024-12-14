@@ -11,10 +11,9 @@ import CoreData
 class IngredientsListViewController: UIViewController {
 
     private var tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
+    private var dataSource: UITableViewDiffableDataSource<Int, RecipeIngredient>!
 
-    private var dataSource: UITableViewDiffableDataSource<Int, String>!
-
-    private var ingredients = ["Tomato", "Onion", "Garlic", "Pepper", "Basil"]
+    private var ingredients: [RecipeIngredient] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +22,12 @@ class IngredientsListViewController: UIViewController {
         
         setupTableView()
         setupDataSource()
-        applySnapshot()
+        setupNavigationBar()
+        fetchIngredients()
+    }
+    
+    private func setupNavigationBar() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddButton))
     }
 
     private func setupTableView() {
@@ -40,9 +44,9 @@ class IngredientsListViewController: UIViewController {
     }
 
     private func setupDataSource() {
-        dataSource = UITableViewDiffableDataSource<Int, String>(tableView: tableView) { tableView, indexPath, ingredient in
+        dataSource = UITableViewDiffableDataSource<Int, RecipeIngredient>(tableView: tableView) { tableView, indexPath, ingredient in
             let cell = tableView.dequeueReusableCell(withIdentifier: "IngredientCell") ?? UITableViewCell(style: .default, reuseIdentifier: "IngredientCell")
-            cell.textLabel?.text = ingredient
+            cell.textLabel?.text = ingredient.name
             return cell
         }
         dataSource.defaultRowAnimation = .fade
@@ -50,7 +54,7 @@ class IngredientsListViewController: UIViewController {
     }
 
     private func applySnapshot() {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
+        var snapshot = NSDiffableDataSourceSnapshot<Int, RecipeIngredient>()
         snapshot.appendSections([0])
         snapshot.appendItems(ingredients)
         dataSource.apply(snapshot, animatingDifferences: true)
@@ -61,6 +65,31 @@ class IngredientsListViewController: UIViewController {
         
         ingredients.removeAll { $0 == ingredient }
         applySnapshot()
+    }
+    
+    private func fetchIngredients() {
+        let dao = RecipeIngredientDAO()
+        ingredients = dao.fetchAll()
+        applySnapshot()
+    }
+    
+    @objc private func didTapAddButton() {
+        let addIngredientVC = AddIngredientViewController { [weak self] newIngredient in
+            guard let self = self else { return }
+            let dao = RecipeIngredientDAO()
+            if let insertedIngredient = dao.insert(name: newIngredient) {
+                self.ingredients.append(insertedIngredient)
+                self.applySnapshot()
+            }
+        }
+        
+        let navigationController = UINavigationController(rootViewController: addIngredientVC)
+        navigationController.modalPresentationStyle = .pageSheet
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        present(navigationController, animated: true, completion: nil)
     }
 }
 
