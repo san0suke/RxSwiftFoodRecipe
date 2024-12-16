@@ -7,9 +7,11 @@
 
 import UIKit
 
-class AddIngredientViewController: UIViewController {
+class IngredientFormViewController: UIViewController {
     
-    private let completion: (String) -> Void
+    private var ingredientDao = RecipeIngredientDAO()
+    private let completion: (RecipeIngredient) -> Void
+    private var ingredient: RecipeIngredient?
 
     private let textField: UITextField = {
         let textField = UITextField()
@@ -19,8 +21,10 @@ class AddIngredientViewController: UIViewController {
         return textField
     }()
 
-    init(completion: @escaping (String) -> Void) {
+    init(completion: @escaping (RecipeIngredient) -> Void, ingredient: RecipeIngredient? = nil) {
         self.completion = completion
+        self.ingredient = ingredient
+        
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -31,8 +35,20 @@ class AddIngredientViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        title = "Add Ingredient"
+        
+        if ingredient == nil {
+            ingredient = ingredientDao.createIngredient()
+            title = "Add Ingredient"
+        } else {
+            title = "Edit Ingredient"
+        }
+        
+        setupForm()
         setupUI()
+    }
+    
+    private func setupForm() {
+        textField.text = ingredient?.name ?? ""
     }
 
     private func setupUI() {
@@ -48,8 +64,15 @@ class AddIngredientViewController: UIViewController {
     }
 
     @objc private func didTapSaveButton() {
-        guard let ingredientName = textField.text, !ingredientName.isEmpty else { return }
-        completion(ingredientName)
+        guard let ingredientName = textField.text,
+              let ingredient = ingredient,
+                !ingredientName.isEmpty
+         else { return }
+        
+        ingredient.name = ingredientName
+        
+        completion(ingredient)
+        
         dismiss(animated: true, completion: nil)
     }
 

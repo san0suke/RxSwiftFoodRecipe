@@ -11,9 +11,20 @@ import CoreData
 class IngredientsListViewController: UIViewController {
 
     private var tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
-    private var dataSource: UITableViewDiffableDataSource<Int, RecipeIngredient>!
+    
+    private lazy var dataSource: UITableViewDiffableDataSource<Int, RecipeIngredient> = {
+        UITableViewDiffableDataSource<Int, RecipeIngredient>(tableView: tableView) { tableView, indexPath, ingredient in
+            let cell = tableView.dequeueReusableCell(withIdentifier: "IngredientCell") ?? UITableViewCell(style: .default, reuseIdentifier: "IngredientCell")
+            cell.textLabel?.text = ingredient.name
+            return cell
+        }
+    }()
+    
+    private lazy var snapshot: NSDiffableDataSourceSnapshot<Int, RecipeIngredient> = {
+        NSDiffableDataSourceSnapshot<Int, RecipeIngredient>()
+    }()
+    
     private let ingredientDao = RecipeIngredientDAO()
-
     private var ingredients: [RecipeIngredient] = []
 
     override func viewDidLoad() {
@@ -25,6 +36,7 @@ class IngredientsListViewController: UIViewController {
         setupDataSource()
         setupNavigationBar()
         fetchIngredients()
+        applySnapshot()
     }
     
     private func setupNavigationBar() {
@@ -45,17 +57,11 @@ class IngredientsListViewController: UIViewController {
     }
 
     private func setupDataSource() {
-        dataSource = UITableViewDiffableDataSource<Int, RecipeIngredient>(tableView: tableView) { tableView, indexPath, ingredient in
-            let cell = tableView.dequeueReusableCell(withIdentifier: "IngredientCell") ?? UITableViewCell(style: .default, reuseIdentifier: "IngredientCell")
-            cell.textLabel?.text = ingredient.name
-            return cell
-        }
         dataSource.defaultRowAnimation = .fade
         tableView.delegate = self
     }
 
     private func applySnapshot() {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, RecipeIngredient>()
         snapshot.appendSections([0])
         snapshot.appendItems(ingredients)
         dataSource.apply(snapshot, animatingDifferences: true)
@@ -65,24 +71,28 @@ class IngredientsListViewController: UIViewController {
         guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return }
         
         ingredients.removeAll { $0 == ingredient }
-        applySnapshot()
     }
     
     private func fetchIngredients() {
         ingredients = ingredientDao.fetchAll()
-        applySnapshot()
     }
     
     @objc private func didTapAddButton() {
-        let addIngredientVC = AddIngredientViewController { [weak self] newIngredient in
+        let viewController = IngredientFormViewController { [weak self] ingredient in
             guard let self = self else { return }
-            if let insertedIngredient = ingredientDao.insert(name: newIngredient) {
-                self.ingredients.append(insertedIngredient)
-                self.applySnapshot()
+            
+            if ingredientDao.saveContext() {
+                self.fetchIngredients()
+                snapshot.appendItems([ingredient])
+                dataSource.apply(snapshot, animatingDifferences: true)
             }
         }
         
-        let navigationController = UINavigationController(rootViewController: addIngredientVC)
+        presentIngredientFormVC(viewController)
+    }
+    
+    private func presentIngredientFormVC(_ viewController: UIViewController) {
+        let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.modalPresentationStyle = .pageSheet
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium()]
@@ -102,11 +112,25 @@ extension IngredientsListViewController: UITableViewDelegate {
             
             if ingredientDao.delete(ingredient: ingredient) {
                 self.ingredients.removeAll { $0 == ingredient }
-                self.applySnapshot()
             }
             completion(true)
         }
         
         return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return }
+        
+        let editIngredientVC = IngredientFormViewController(completion: { [weak self] ingredient in
+            guard let self = self else { return }
+            
+            if ingredientDao.saveContext() {
+                self.fetchIngredients()
+                snapshot.reloadItems([ingredient])
+                dataSource.apply(snapshot, animatingDifferences: true)
+            }
+        }, ingredient: ingredient)
+        presentIngredientFormVC(editIngredientVC)
     }
 }

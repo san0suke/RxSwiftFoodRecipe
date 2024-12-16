@@ -16,6 +16,10 @@ class RecipeIngredientDAO {
     init(context: NSManagedObjectContext = CoreDataManager.shared.persistentContainer.viewContext) {
         self.context = context
     }
+    
+    func createIngredient() -> RecipeIngredient {
+        RecipeIngredient(context: context)
+    }
 
     // MARK: - Fetch
     func fetchAll() -> [RecipeIngredient] {
@@ -41,24 +45,7 @@ class RecipeIngredientDAO {
         }
     }
 
-    // MARK: - Insert
-    func insert(name: String) -> RecipeIngredient? {
-        let ingredient = RecipeIngredient(context: context)
-        ingredient.name = name
-
-        do {
-            try context.save()
-            return ingredient
-        } catch {
-            print("Failed to insert RecipeIngredient: \(error)")
-            return nil
-        }
-    }
-
-    // MARK: - Update
-    func update(ingredient: RecipeIngredient, newName: String) -> Bool {
-        ingredient.name = newName
-
+    func saveContext() -> Bool {
         do {
             try context.save()
             return true
