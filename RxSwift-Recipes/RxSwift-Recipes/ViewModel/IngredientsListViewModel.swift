@@ -5,40 +5,40 @@
 //  Created by Robson Cesar de Siqueira on 16/12/24.
 //
 
+import RxSwift
+import RxCocoa
 import CoreData
 
 class IngredientsListViewModel {
     
-    private let ingredientDao = RecipeIngredientDAO()
+    private let ingredientDAO = RecipeIngredientDAO()
     
-    var onIngredientsUpdated: (() -> Void)?
+    // Observable com os ingredientes
+    let ingredients: BehaviorRelay<[RecipeIngredient]> = BehaviorRelay(value: [])
     
     // MARK: - Fetch Ingredients
     func fetchIngredients() {
-        onIngredientsUpdated?()
+        ingredients.accept(ingredientDAO.fetchAll())
     }
     
     // MARK: - Add Ingredient
-    func addIngredient(_ ingredient: RecipeIngredient) -> Bool {
-        return false
-//        let inserted = ingredientDao.insert(name: name)
-//        fetchIngredients()
-//        return inserted
+    func addIngredient(_ ingredient: RecipeIngredient) {
+        if ingredientDAO.insert(ingredient) {
+            fetchIngredients()
+        }
     }
     
     // MARK: - Update Ingredient
-    func updateIngredient(_ ingredient: RecipeIngredient, newName: String) -> Bool {
-        return false
-//        let success = ingredientDao.update(ingredient: ingredient, newName: newName)
-//        fetchIngredients()
-//        return success
+    func updateIngredient(_ ingredient: RecipeIngredient) {
+        if ingredientDAO.saveContext() {
+            fetchIngredients()
+        }
     }
     
     // MARK: - Delete Ingredient
-    func deleteIngredient(_ ingredient: RecipeIngredient) -> Bool {
-        return false
-//        let success = ingredientDao.delete(ingredient: ingredient)
-//        fetchIngredients()
-//        return success
+    func deleteIngredient(_ ingredient: RecipeIngredient) {
+        if ingredientDAO.delete(ingredient: ingredient) {
+            fetchIngredients()
+        }
     }
 }
