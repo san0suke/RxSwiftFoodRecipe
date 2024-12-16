@@ -17,10 +17,6 @@ class RecipeIngredientDAO {
         self.context = context
     }
     
-    func createIngredient() -> RecipeIngredient {
-        RecipeIngredient(entity: RecipeIngredient.entity(), insertInto: nil)
-    }
-
     // MARK: - Fetch
     func fetchAll() -> [RecipeIngredient] {
         let fetchRequest: NSFetchRequest<RecipeIngredient> = RecipeIngredient.fetchRequest()
@@ -66,13 +62,6 @@ class RecipeIngredientDAO {
     // MARK: - Delete
     func delete(ingredient: RecipeIngredient) -> Bool {
         context.delete(ingredient)
-
-        do {
-            try context.save()
-            return true
-        } catch {
-            print("Failed to delete RecipeIngredient: \(error)")
-            return false
-        }
+        return saveContext()
     }
 }

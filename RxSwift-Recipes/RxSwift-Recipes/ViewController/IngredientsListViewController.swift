@@ -7,38 +7,36 @@
 
 import UIKit
 import CoreData
+import RxSwift
+import RxCocoa
 
 class IngredientsListViewController: UIViewController {
 
     private var tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
+    private let disposeBag = DisposeBag()
+    private let ingredientDAO = RecipeIngredientDAO()
     
-    private lazy var dataSource: UITableViewDiffableDataSource<Int, RecipeIngredient> = {
-        UITableViewDiffableDataSource<Int, RecipeIngredient>(tableView: tableView) { tableView, indexPath, ingredient in
-            let cell = tableView.dequeueReusableCell(withIdentifier: "IngredientCell") ?? UITableViewCell(style: .default, reuseIdentifier: "IngredientCell")
-            cell.textLabel?.text = ingredient.name
-            return cell
-        }
-    }()
+    private let ingredientsRelay = BehaviorRelay<[RecipeIngredient]>(value: [])
     
-    private let ingredientDao = RecipeIngredientDAO()
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         title = "Ingredients"
         
         setupTableView()
-        setupDataSource()
         setupNavigationBar()
-        reloadTable()
+        bindTableView()
+        fetchIngredients()
     }
     
+    // MARK: - Setup UI
     private func setupNavigationBar() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddButton))
     }
 
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "IngredientCell")
         
         view.addSubview(tableView)
         
@@ -49,65 +47,59 @@ class IngredientsListViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
-    private func setupDataSource() {
-        dataSource.defaultRowAnimation = .fade
-        tableView.delegate = self
-    }
-
-    private func reloadTable(ingredient: RecipeIngredient? = nil) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, RecipeIngredient>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(ingredientDao.fetchAll())
+    
+    // MARK: - Bind TableView
+    private func bindTableView() {
+        ingredientsRelay
+            .bind(to: tableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
+                cell.textLabel?.text = ingredient.name
+            }
+            .disposed(by: disposeBag)
         
-        if let ingredient = ingredient {
-            snapshot.reloadItems([ingredient])
-        }
+        tableView.rx.modelDeleted(RecipeIngredient.self)
+            .subscribe(onNext: { [weak self] ingredient in
+                self?.deleteIngredient(ingredient)
+            })
+            .disposed(by: disposeBag)
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        tableView.rx.modelSelected(RecipeIngredient.self)
+            .subscribe(onNext: { [weak self] ingredient in
+                self?.presentEditIngredientForm(for: ingredient)
+            })
+            .disposed(by: disposeBag)
     }
     
+    // MARK: - Fetch Ingredients
+    private func fetchIngredients() {
+        ingredientsRelay.accept(ingredientDAO.fetchAll())
+    }
+    
+    // MARK: - Add Ingredient
     @objc private func didTapAddButton() {
-        let viewController = IngredientFormViewController { [weak self] ingredient in
+        let formVC = IngredientFormViewController { [weak self] ingredient in
             guard let self = self else { return }
-            
-            if ingredientDao.insert(ingredient) {
-                reloadTable()
+            if self.ingredientDAO.insert(ingredient) {
+                self.fetchIngredients()
             }
         }
-        
-        presentMediumModal(viewController)
+        presentMediumModal(formVC)
     }
-}
-
-extension IngredientsListViewController: UITableViewDelegate {
     
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return nil }
-        
-        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
-            guard let self = self else { return }
-            
-            if ingredientDao.delete(ingredient: ingredient) {
-                dataSource.delete(item: ingredient)
-            }
-            completion(true)
+    // MARK: - Delete Ingredient
+    private func deleteIngredient(_ ingredient: RecipeIngredient) {
+        if ingredientDAO.delete(ingredient: ingredient) {
+            fetchIngredients()
         }
-        
-        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let ingredient = dataSource.itemIdentifier(for: indexPath) else { return }
-        
-        let editIngredientVC = IngredientFormViewController(completion: { [weak self] ingredient in
+    // MARK: - Edit Ingredient
+    private func presentEditIngredientForm(for ingredient: RecipeIngredient) {
+        let formVC = IngredientFormViewController(completion: { [weak self] updatedIngredient in
             guard let self = self else { return }
-            
-            if ingredientDao.saveContext() {
-                reloadTable(ingredient: ingredient)
+            if self.ingredientDAO.saveContext() {
+                self.fetchIngredients()
             }
         }, ingredient: ingredient)
-        
-        presentMediumModal(editIngredientVC)
+        presentMediumModal(formVC)
     }
 }
