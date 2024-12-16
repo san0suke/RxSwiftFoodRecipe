@@ -76,17 +76,7 @@ class IngredientsListViewController: UIViewController {
             }
         }
         
-        presentIngredientFormVC(viewController)
-    }
-    
-    private func presentIngredientFormVC(_ viewController: UIViewController) {
-        let navigationController = UINavigationController(rootViewController: viewController)
-        navigationController.modalPresentationStyle = .pageSheet
-        if let sheet = navigationController.sheetPresentationController {
-            sheet.detents = [.medium()]
-            sheet.prefersGrabberVisible = true
-        }
-        present(navigationController, animated: true, completion: nil)
+        presentMediumModal(viewController)
     }
 }
 
@@ -117,6 +107,7 @@ extension IngredientsListViewController: UITableViewDelegate {
                 reloadTable(ingredient: ingredient)
             }
         }, ingredient: ingredient)
-        presentIngredientFormVC(editIngredientVC)
+        
+        presentMediumModal(editIngredientVC)
     }
 }
