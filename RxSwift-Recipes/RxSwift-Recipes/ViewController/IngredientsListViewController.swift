@@ -24,7 +24,7 @@ class IngredientsListViewController: UIViewController {
         setupNavigationBar()
         bindTableView()
         
-        viewModel.fetchIngredients()
+        viewModel.fetch()
     }
     
     // MARK: - Setup UI
@@ -34,7 +34,7 @@ class IngredientsListViewController: UIViewController {
 
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "IngredientCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         
         view.addSubview(tableView)
         
@@ -50,7 +50,7 @@ class IngredientsListViewController: UIViewController {
     private func bindTableView() {
         // Binding: ViewModel -> TableView
         viewModel.ingredients
-            .bind(to: tableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
+            .bind(to: tableView.rx.items(cellIdentifier: "Cell")) { _, ingredient, cell in
                 cell.textLabel?.text = ingredient.name
             }
             .disposed(by: disposeBag)
@@ -58,7 +58,7 @@ class IngredientsListViewController: UIViewController {
         // Handling delete action
         tableView.rx.modelDeleted(RecipeIngredient.self)
             .subscribe(onNext: { [weak self] ingredient in
-                self?.viewModel.deleteIngredient(ingredient)
+                self?.viewModel.delete(ingredient)
             })
             .disposed(by: disposeBag)
         
@@ -73,7 +73,7 @@ class IngredientsListViewController: UIViewController {
     // MARK: - Add Ingredient
     @objc private func didTapAddButton() {
         let formVC = IngredientFormViewController { [weak self] ingredient in
-            self?.viewModel.addIngredient(ingredient)
+            self?.viewModel.add(ingredient)
         }
         
         presentMediumModal(formVC)
@@ -81,8 +81,8 @@ class IngredientsListViewController: UIViewController {
     
     // MARK: - Edit Ingredient
     private func presentEditIngredientForm(for ingredient: RecipeIngredient) {
-        let formVC = IngredientFormViewController(completion: { [weak self] updatedIngredient in
-            self?.viewModel.updateIngredient(updatedIngredient)
+        let formVC = IngredientFormViewController(completion: { [weak self] _ in
+            self?.viewModel.update()
         }, ingredient: ingredient)
         
         presentMediumModal(formVC)

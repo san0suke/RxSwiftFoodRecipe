@@ -23,17 +23,4 @@ class FoodRecipeDAO: BaseDAO {
             return []
         }
     }
-
-    // MARK: - Fetch By Name
-    func fetchByName(_ name: String) -> [FoodRecipe] {
-        let fetchRequest: NSFetchRequest<FoodRecipe> = FoodRecipe.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "name == %@", name)
-        
-        do {
-            return try context.fetch(fetchRequest)
-        } catch {
-            print("Failed to fetch FoodRecipes by name: \(error)")
-            return []
-        }
-    }
 }

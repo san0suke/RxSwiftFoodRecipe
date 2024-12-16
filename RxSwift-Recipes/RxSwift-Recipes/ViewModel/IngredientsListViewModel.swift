@@ -17,28 +17,28 @@ class IngredientsListViewModel {
     let ingredients: BehaviorRelay<[RecipeIngredient]> = BehaviorRelay(value: [])
     
     // MARK: - Fetch Ingredients
-    func fetchIngredients() {
+    func fetch() {
         ingredients.accept(ingredientDAO.fetchAll())
     }
     
     // MARK: - Add Ingredient
-    func addIngredient(_ ingredient: RecipeIngredient) {
+    func add(_ ingredient: RecipeIngredient) {
         if ingredientDAO.insert(ingredient) {
-            fetchIngredients()
+            fetch()
         }
     }
     
     // MARK: - Update Ingredient
-    func updateIngredient(_ ingredient: RecipeIngredient) {
+    func update() {
         if ingredientDAO.saveContext() {
-            fetchIngredients()
+            fetch()
         }
     }
     
     // MARK: - Delete Ingredient
-    func deleteIngredient(_ ingredient: RecipeIngredient) {
+    func delete(_ ingredient: RecipeIngredient) {
         if ingredientDAO.delete(ingredient) {
-            fetchIngredients()
+            fetch()
         }
     }
 }
