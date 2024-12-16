@@ -37,7 +37,7 @@ class IngredientsListViewModel {
     
     // MARK: - Delete Ingredient
     func deleteIngredient(_ ingredient: RecipeIngredient) {
-        if ingredientDAO.delete(ingredient: ingredient) {
+        if ingredientDAO.delete(ingredient) {
             fetchIngredients()
         }
     }

@@ -15,18 +15,18 @@ class FoodRecipeListViewController: UIViewController {
     private let disposeBag = DisposeBag()
     private let viewModel = FoodRecipeListViewModel()
     
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        view.backgroundColor = .white
-//        title = "Recipes"
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        title = "Recipes"
 //        
 //        setupTableView()
 //        setupNavigationBar()
 //        bindTableView()
 //        
 //        viewModel.fetchIngredients()
-//    }
-//    
+    }
+    
 //    // MARK: - Setup UI
 //    private func setupNavigationBar() {
 //        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddButton))

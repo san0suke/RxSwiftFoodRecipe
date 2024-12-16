@@ -7,16 +7,8 @@
 
 import CoreData
 
-class RecipeIngredientDAO {
+class RecipeIngredientDAO: BaseDAO {
 
-    // MARK: - Properties
-    private let context: NSManagedObjectContext
-
-    // MARK: - Initialization
-    init(context: NSManagedObjectContext = CoreDataManager.shared.persistentContainer.viewContext) {
-        self.context = context
-    }
-    
     // MARK: - Fetch
     func fetchAll() -> [RecipeIngredient] {
         let fetchRequest: NSFetchRequest<RecipeIngredient> = RecipeIngredient.fetchRequest()
@@ -42,14 +34,5 @@ class RecipeIngredientDAO {
             print("Failed to fetch RecipeIngredients by name: \(error)")
             return []
         }
-    }
-    
-    func insert(_ ingredient: RecipeIngredient) -> Bool {
-        context.insertAndSave(ingredient)
-    }
-
-    // MARK: - Delete
-    func delete(ingredient: RecipeIngredient) -> Bool {
-        context.deleteAndSave(ingredient)
     }
 }
