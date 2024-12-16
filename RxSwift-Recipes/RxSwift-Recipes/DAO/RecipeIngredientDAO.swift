@@ -45,23 +45,11 @@ class RecipeIngredientDAO {
     }
     
     func insert(_ ingredient: RecipeIngredient) -> Bool {
-        context.insert(ingredient)
-        return saveContext()
-    }
-
-    func saveContext() -> Bool {
-        do {
-            try context.save()
-            return true
-        } catch {
-            print("Failed to update RecipeIngredient: \(error)")
-            return false
-        }
+        context.insertAndSave(ingredient)
     }
 
     // MARK: - Delete
     func delete(ingredient: RecipeIngredient) -> Bool {
-        context.delete(ingredient)
-        return saveContext()
+        context.deleteAndSave(ingredient)
     }
 }
