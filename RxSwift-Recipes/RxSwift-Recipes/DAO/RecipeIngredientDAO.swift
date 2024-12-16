@@ -18,7 +18,7 @@ class RecipeIngredientDAO {
     }
     
     func createIngredient() -> RecipeIngredient {
-        RecipeIngredient(context: context)
+        RecipeIngredient(entity: RecipeIngredient.entity(), insertInto: nil)
     }
 
     // MARK: - Fetch
@@ -46,6 +46,11 @@ class RecipeIngredientDAO {
             print("Failed to fetch RecipeIngredients by name: \(error)")
             return []
         }
+    }
+    
+    func insert(_ ingredient: RecipeIngredient) -> Bool {
+        context.insert(ingredient)
+        return saveContext()
     }
 
     func saveContext() -> Bool {

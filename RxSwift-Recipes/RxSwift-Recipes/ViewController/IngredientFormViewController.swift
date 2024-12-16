@@ -9,7 +9,6 @@ import UIKit
 
 class IngredientFormViewController: UIViewController {
     
-    private var ingredientDao = RecipeIngredientDAO()
     private let completion: (RecipeIngredient) -> Void
     private var ingredient: RecipeIngredient?
 
@@ -37,7 +36,6 @@ class IngredientFormViewController: UIViewController {
         view.backgroundColor = .white
         
         if ingredient == nil {
-            ingredient = ingredientDao.createIngredient()
             title = "Add Ingredient"
         } else {
             title = "Edit Ingredient"
@@ -65,9 +63,10 @@ class IngredientFormViewController: UIViewController {
 
     @objc private func didTapSaveButton() {
         guard let ingredientName = textField.text,
-              let ingredient = ingredient,
                 !ingredientName.isEmpty
          else { return }
+        
+        guard let ingredient = ingredient != nil ? ingredient : RecipeIngredient(entity: RecipeIngredient.entity(), insertInto: nil) else { return }
         
         ingredient.name = ingredientName
         

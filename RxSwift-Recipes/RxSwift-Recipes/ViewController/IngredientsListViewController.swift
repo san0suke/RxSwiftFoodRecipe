@@ -71,7 +71,7 @@ class IngredientsListViewController: UIViewController {
         let viewController = IngredientFormViewController { [weak self] ingredient in
             guard let self = self else { return }
             
-            if ingredientDao.saveContext() {
+            if ingredientDao.insert(ingredient) {
                 reloadTable()
             }
         }
