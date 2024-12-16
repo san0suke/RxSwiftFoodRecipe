@@ -20,10 +20,6 @@ class IngredientsListViewController: UIViewController {
         }
     }()
     
-    private lazy var snapshot: NSDiffableDataSourceSnapshot<Int, RecipeIngredient> = {
-        NSDiffableDataSourceSnapshot<Int, RecipeIngredient>()
-    }()
-    
     private let ingredientDao = RecipeIngredientDAO()
 
     override func viewDidLoad() {
@@ -34,7 +30,7 @@ class IngredientsListViewController: UIViewController {
         setupTableView()
         setupDataSource()
         setupNavigationBar()
-        applySnapshot()
+        reloadTable()
     }
     
     private func setupNavigationBar() {
@@ -59,9 +55,15 @@ class IngredientsListViewController: UIViewController {
         tableView.delegate = self
     }
 
-    private func applySnapshot() {
+    private func reloadTable(ingredient: RecipeIngredient? = nil) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, RecipeIngredient>()
         snapshot.appendSections([0])
         snapshot.appendItems(ingredientDao.fetchAll())
+        
+        if let ingredient = ingredient {
+            snapshot.reloadItems([ingredient])
+        }
+        
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
@@ -70,8 +72,7 @@ class IngredientsListViewController: UIViewController {
             guard let self = self else { return }
             
             if ingredientDao.saveContext() {
-                snapshot.appendItems([ingredient])
-                dataSource.apply(snapshot, animatingDifferences: true)
+                reloadTable()
             }
         }
         
@@ -98,8 +99,7 @@ extension IngredientsListViewController: UITableViewDelegate {
             guard let self = self else { return }
             
             if ingredientDao.delete(ingredient: ingredient) {
-                snapshot.deleteItems([ingredient])
-                dataSource.apply(snapshot, animatingDifferences: true)
+                dataSource.delete(item: ingredient)
             }
             completion(true)
         }
@@ -114,8 +114,7 @@ extension IngredientsListViewController: UITableViewDelegate {
             guard let self = self else { return }
             
             if ingredientDao.saveContext() {
-                snapshot.reloadItems([ingredient])
-                dataSource.apply(snapshot, animatingDifferences: true)
+                reloadTable(ingredient: ingredient)
             }
         }, ingredient: ingredient)
         presentIngredientFormVC(editIngredientVC)

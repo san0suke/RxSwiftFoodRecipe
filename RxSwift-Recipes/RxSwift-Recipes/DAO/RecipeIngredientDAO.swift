@@ -25,6 +25,9 @@ class RecipeIngredientDAO {
     func fetchAll() -> [RecipeIngredient] {
         let fetchRequest: NSFetchRequest<RecipeIngredient> = RecipeIngredient.fetchRequest()
 
+        let sortDescriptor = NSSortDescriptor(key: "name", ascending: true)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
         do {
             return try context.fetch(fetchRequest)
         } catch {
