@@ -6,11 +6,14 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class IngredientFormViewController: UIViewController {
     
+    private let viewModel: IngredientFormViewModel
     private let completion: (RecipeIngredient) -> Void
-    private var ingredient: RecipeIngredient?
+    private let disposeBag = DisposeBag()
 
     private let textField: UITextField = {
         let textField = UITextField()
@@ -19,11 +22,11 @@ class IngredientFormViewController: UIViewController {
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
-
+    
+    // MARK: - Initialization
     init(completion: @escaping (RecipeIngredient) -> Void, ingredient: RecipeIngredient? = nil) {
         self.completion = completion
-        self.ingredient = ingredient
-        
+        self.viewModel = IngredientFormViewModel(ingredient: ingredient)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -31,24 +34,16 @@ class IngredientFormViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        title = viewModel.isEditing ? "Edit Ingredient" : "Add Ingredient"
         
-        if ingredient == nil {
-            title = "Add Ingredient"
-        } else {
-            title = "Edit Ingredient"
-        }
-        
-        setupForm()
         setupUI()
+        bindViewModel()
     }
     
-    private func setupForm() {
-        textField.text = ingredient?.name ?? ""
-    }
-
     private func setupUI() {
         view.addSubview(textField)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(didTapSaveButton))
@@ -60,18 +55,20 @@ class IngredientFormViewController: UIViewController {
             textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
     }
+    
+    private func bindViewModel() {
+        viewModel.ingredientName
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
+        
+        textField.rx.text.orEmpty
+            .bind(to: viewModel.ingredientName)
+            .disposed(by: disposeBag)
+    }
 
+    // MARK: - Actions
     @objc private func didTapSaveButton() {
-        guard let ingredientName = textField.text,
-                !ingredientName.isEmpty
-         else { return }
-        
-        guard let ingredient = ingredient != nil ? ingredient : RecipeIngredient(entity: RecipeIngredient.entity(), insertInto: nil) else { return }
-        
-        ingredient.name = ingredientName
-        
-        completion(ingredient)
-        
+        completion(viewModel.getUpdatedIngredient())
         dismiss(animated: true, completion: nil)
     }
 
@@ -79,3 +76,4 @@ class IngredientFormViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
 }
+
