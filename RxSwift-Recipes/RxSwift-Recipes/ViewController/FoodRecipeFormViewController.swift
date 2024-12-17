@@ -53,6 +53,20 @@ class FoodRecipeFormViewController: UIViewController {
         return textField
     }()
     
+    private let selectIngredientsButton: UIButton = {
+        let button = UIButton(type: .system)
+        var configuration = UIButton.Configuration.filled()
+        configuration.title = "Ingredients"
+        configuration.image = UIImage(systemName: "plus")
+        configuration.imagePadding = 8
+        configuration.baseBackgroundColor = .systemBlue
+        configuration.baseForegroundColor = .white
+        configuration.cornerStyle = .medium
+        
+        button.configuration = configuration
+        return button
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -70,6 +84,8 @@ class FoodRecipeFormViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(stackView)
         
+        selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
+        
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -86,11 +102,10 @@ class FoodRecipeFormViewController: UIViewController {
     }
     
     private func setupStackView() {
-        // Adiciona o container com a label e o textField
         setupNameContainerView()
         
-        // Adiciona o container ao stackView
         stackView.addArrangedSubview(nameContainerView)
+        stackView.addArrangedSubview(selectIngredientsButton)
     }
     
     private func setupNameContainerView() {
@@ -98,17 +113,23 @@ class FoodRecipeFormViewController: UIViewController {
         nameContainerView.addSubview(nameTextField)
         
         NSLayoutConstraint.activate([
-            // Subtitle Label
             subtitleLabel.topAnchor.constraint(equalTo: nameContainerView.topAnchor, constant: 8),
             subtitleLabel.leadingAnchor.constraint(equalTo: nameContainerView.leadingAnchor, constant: 8),
             subtitleLabel.trailingAnchor.constraint(equalTo: nameContainerView.trailingAnchor, constant: -8),
             
-            // Name TextField
             nameTextField.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 8),
             nameTextField.leadingAnchor.constraint(equalTo: nameContainerView.leadingAnchor, constant: 8),
             nameTextField.trailingAnchor.constraint(equalTo: nameContainerView.trailingAnchor, constant: -8),
             nameTextField.bottomAnchor.constraint(equalTo: nameContainerView.bottomAnchor, constant: -8),
             nameTextField.heightAnchor.constraint(equalToConstant: 40)
         ])
+    }
+    
+    @objc private func onSelectIngredientTap() {
+        let viewController = SelectIngredientViewController { ingredients in
+            
+        }
+        
+        presentMediumModal(viewController)
     }
 }
