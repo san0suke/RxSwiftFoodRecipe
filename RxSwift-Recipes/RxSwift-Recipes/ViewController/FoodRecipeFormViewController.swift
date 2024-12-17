@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 import CoreData
 
 class FoodRecipeFormViewController: UIViewController {
@@ -67,15 +69,27 @@ class FoodRecipeFormViewController: UIViewController {
         return button
     }()
     
+    private let ingredientsTableView: UITableView = {
+        let tableView = UITableView(frame: .zero, style: .insetGrouped)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
+    
+    // MARK: - RxSwift
+    private let disposeBag = DisposeBag()
+    private let selectedIngredientsRelay = BehaviorRelay<[RecipeIngredient]>(value: [])
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
+        super.viewDidLoad()
         view.backgroundColor = .white
-        
         title = "Add Recipe"
         
         setupScrollView()
         setupStackView()
+        setupTableView()
+        bindTableView()
     }
     
     // MARK: - Setup Methods
@@ -96,16 +110,17 @@ class FoodRecipeFormViewController: UIViewController {
             stackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),
             stackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -16),
-            
             stackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32)
         ])
     }
     
     private func setupStackView() {
         setupNameContainerView()
-        
         stackView.addArrangedSubview(nameContainerView)
         stackView.addArrangedSubview(selectIngredientsButton)
+        stackView.addArrangedSubview(ingredientsTableView)
+        
+        ingredientsTableView.heightAnchor.constraint(equalToConstant: 200).isActive = true
     }
     
     private func setupNameContainerView() {
@@ -125,9 +140,25 @@ class FoodRecipeFormViewController: UIViewController {
         ])
     }
     
+    private func setupTableView() {
+        ingredientsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "IngredientCell")
+    }
+    
+    private func bindTableView() {
+        // Bind dos ingredientes selecionados à TableView
+        selectedIngredientsRelay
+            .bind(to: ingredientsTableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
+                cell.textLabel?.text = ingredient.name ?? "Unnamed Ingredient"
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    // MARK: - Actions
+    
     @objc private func onSelectIngredientTap() {
-        let viewController = SelectIngredientViewController { ingredients in
-            
+        let viewController = SelectIngredientViewController(selected: selectedIngredientsRelay.value) { [weak self] ingredients in
+            guard let self = self else { return }
+            self.selectedIngredientsRelay.accept(ingredients)
         }
         
         presentMediumModal(viewController)
