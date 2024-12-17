@@ -14,12 +14,6 @@ class FoodRecipeFormViewController: UIViewController {
     
     // MARK: - UI Components
     
-    private let scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        return scrollView
-    }()
-    
     private let stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -86,42 +80,37 @@ class FoodRecipeFormViewController: UIViewController {
         view.backgroundColor = .white
         title = "Add Recipe"
         
-        setupScrollView()
-        setupStackView()
+        setupUI()
         setupTableView()
         bindTableView()
     }
     
-    // MARK: - Setup Methods
+    // MARK: - Setup UI
     
-    private func setupScrollView() {
-        view.addSubview(scrollView)
-        scrollView.addSubview(stackView)
+    private func setupUI() {
+        view.addSubview(stackView)
         
-        selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
-        
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
-            stackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16),
-            stackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),
-            stackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -16),
-            stackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32)
-        ])
-    }
-    
-    private func setupStackView() {
         setupNameContainerView()
         stackView.addArrangedSubview(nameContainerView)
         stackView.addArrangedSubview(selectIngredientsButton)
-        stackView.addArrangedSubview(ingredientsTableView)
         
-        ingredientsTableView.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+        ])
+        
+        view.addSubview(ingredientsTableView)
+        NSLayoutConstraint.activate([
+            ingredientsTableView.topAnchor.constraint(equalTo: stackView.bottomAnchor, constant: 16),
+            ingredientsTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            ingredientsTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ingredientsTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        selectIngredientsButton.addTarget(self, action: #selector(onSelectIngredientTap), for: .touchUpInside)
     }
+
     
     private func setupNameContainerView() {
         nameContainerView.addSubview(subtitleLabel)
@@ -144,8 +133,11 @@ class FoodRecipeFormViewController: UIViewController {
         ingredientsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "IngredientCell")
     }
     
+    private func setupNavigationBar() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(didTapSaveButton))
+    }
+    
     private func bindTableView() {
-        // Bind dos ingredientes selecionados à TableView
         selectedIngredientsRelay
             .bind(to: ingredientsTableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
                 cell.textLabel?.text = ingredient.name ?? "Unnamed Ingredient"
@@ -162,5 +154,9 @@ class FoodRecipeFormViewController: UIViewController {
         }
         
         presentMediumModal(viewController)
+    }
+    
+    @objc private func didTapSaveButton() {
+        dismiss()
     }
 }
