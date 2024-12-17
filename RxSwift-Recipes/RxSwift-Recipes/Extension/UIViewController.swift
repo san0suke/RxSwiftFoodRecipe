@@ -18,4 +18,10 @@ extension UIViewController {
         }
         present(navigationController, animated: true, completion: nil)
     }
+    
+//    func pushViewController(_ viewController: UIViewController) {
+//        let navigationController = UINavigationController(rootViewController: viewController)
+//        window?.rootViewController = navigationController
+//        window?.makeKeyAndVisible()
+//    }
 }

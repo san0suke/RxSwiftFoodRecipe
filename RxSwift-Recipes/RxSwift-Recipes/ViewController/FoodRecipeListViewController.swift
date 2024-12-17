@@ -69,19 +69,21 @@ class FoodRecipeListViewController: UIViewController {
     
     // MARK: - Add Ingredient
     @objc private func didTapAddButton() {
-//        let formVC = IngredientFormViewController { [weak self] ingredient in
-//            self?.viewModel.add(ingredient)
+//        let viewController = FoodRecipeFormViewController { [weak self] recipe in
+//            self?.viewModel.add(recipe)
 //        }
-//        
-//        presentMediumModal(formVC)
+        
+        let viewController = FoodRecipeFormViewController()
+        navigationController?.pushViewController(viewController, animated: true)
     }
-//    
-//    // MARK: - Edit Ingredient
-    private func presentEditRecipeForm(for ingredient: FoodRecipe) {
-//        let formVC = IngredientFormViewController(completion: { [weak self] updatedIngredient in
-//            self?.viewModel.update(updatedIngredient)
-//        }, ingredient: ingredient)
-//        
-//        presentMediumModal(formVC)
+    
+    // MARK: - Edit Ingredient
+    private func presentEditRecipeForm(for recipe: FoodRecipe) {
+//        let viewController = FoodRecipeFormViewController (completion: { recipe in
+//            
+//        }, foodRecipe: recipe)
+        
+        let viewController = FoodRecipeFormViewController()
+        navigationController?.pushViewController(viewController, animated: true)
     }
 }
