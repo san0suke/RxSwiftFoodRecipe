@@ -71,6 +71,7 @@ class FoodRecipeFormViewController: UIViewController {
     
     // MARK: - RxSwift
     private let disposeBag = DisposeBag()
+    private let viewModel = FoodRecipeFormViewModel()
     private let selectedIngredientsRelay = BehaviorRelay<[RecipeIngredient]>(value: [])
     
     // MARK: - Lifecycle
@@ -81,8 +82,9 @@ class FoodRecipeFormViewController: UIViewController {
         title = "Add Recipe"
         
         setupUI()
+        setupNavigationBar()
         setupTableView()
-        bindTableView()
+        bindViews()
     }
     
     // MARK: - Setup UI
@@ -137,7 +139,15 @@ class FoodRecipeFormViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(didTapSaveButton))
     }
     
-    private func bindTableView() {
+    private func bindViews() {
+        viewModel.recipeName
+            .bind(to: nameTextField.rx.text)
+            .disposed(by: disposeBag)
+        
+        nameTextField.rx.text.orEmpty
+            .bind(to: viewModel.recipeName)
+            .disposed(by: disposeBag)
+        
         selectedIngredientsRelay
             .bind(to: ingredientsTableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
                 cell.textLabel?.text = ingredient.name ?? "Unnamed Ingredient"
@@ -157,6 +167,8 @@ class FoodRecipeFormViewController: UIViewController {
     }
     
     @objc private func didTapSaveButton() {
-        dismiss()
+        if viewModel.save() {
+            dismiss(animated: true)
+        }
     }
 }
