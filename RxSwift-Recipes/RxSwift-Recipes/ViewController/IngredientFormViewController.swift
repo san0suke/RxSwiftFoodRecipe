@@ -12,7 +12,7 @@ import RxCocoa
 class IngredientFormViewController: UIViewController {
     
     private let viewModel: IngredientFormViewModel
-    private let completion: (RecipeIngredient) -> Void
+    private let completion: () -> Void
     private let disposeBag = DisposeBag()
 
     private let textField: UITextField = {
@@ -24,7 +24,7 @@ class IngredientFormViewController: UIViewController {
     }()
     
     // MARK: - Initialization
-    init(completion: @escaping (RecipeIngredient) -> Void, ingredient: RecipeIngredient? = nil) {
+    init(completion: @escaping () -> Void, ingredient: RecipeIngredient? = nil) {
         self.completion = completion
         self.viewModel = IngredientFormViewModel(ingredient: ingredient)
         super.init(nibName: nil, bundle: nil)
@@ -68,7 +68,8 @@ class IngredientFormViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func didTapSaveButton() {
-        completion(viewModel.getUpdatedIngredient())
+        viewModel.save()
+        completion()
         dismiss(animated: true, completion: nil)
     }
 

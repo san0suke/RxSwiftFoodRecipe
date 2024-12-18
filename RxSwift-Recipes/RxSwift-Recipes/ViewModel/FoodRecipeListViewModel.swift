@@ -18,12 +18,6 @@ class FoodRecipeListViewModel {
         recipes.accept(recipeDAO.fetchAll())
     }
     
-    func add(_ recipe: FoodRecipe) {
-        if recipeDAO.insert(recipe) {
-            fetch()
-        }
-    }
-    
     func update() {
         if recipeDAO.saveContext() {
             fetch()

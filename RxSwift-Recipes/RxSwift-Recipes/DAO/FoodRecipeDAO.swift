@@ -10,7 +10,7 @@ import CoreData
 class FoodRecipeDAO: BaseDAO {
     
     func createInstance() -> FoodRecipe {
-        FoodRecipe(entity: FoodRecipe.entity(), insertInto: CoreDataManager.shared.persistentContainer.viewContext)
+        FoodRecipe(entity: FoodRecipe.entity(), insertInto: context)
     }
     
     // MARK: - Fetch All

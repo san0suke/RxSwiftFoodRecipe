@@ -8,6 +8,10 @@
 import CoreData
 
 class RecipeIngredientDAO: BaseDAO {
+    
+    func createInstance() -> RecipeIngredient {
+        RecipeIngredient(entity: RecipeIngredient.entity(), insertInto: context)
+    }
 
     // MARK: - Fetch
     func fetchAll() -> [RecipeIngredient] {

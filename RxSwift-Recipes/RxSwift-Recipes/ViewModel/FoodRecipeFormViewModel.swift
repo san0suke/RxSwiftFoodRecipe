@@ -28,14 +28,20 @@ class FoodRecipeFormViewModel {
     init(foodRecipe: FoodRecipe? = nil, foodRecipeDAO: FoodRecipeDAO = FoodRecipeDAO()) {
         self.foodRecipeDAO = foodRecipeDAO
         self.foodRecipe = foodRecipe
+        
+        if let foodRecipe = foodRecipe {
+            recipeName.accept(foodRecipe.name ?? "")
+            
+            if let ingredients = foodRecipe.ingredients as? Set<RecipeIngredient> {
+                selectedIngredientsRelay.accept(Array(ingredients))
+            }
+        }
     }
     
-    func save() -> Bool {
+    func save() {
         let foodRecipe = foodRecipe ?? foodRecipeDAO.createInstance()
         foodRecipe.name = recipeName.value
         foodRecipe.ingredients = NSSet(array: selectedIngredientsRelay.value)
-        
-        return foodRecipeDAO.insert(foodRecipe)
     }
     
     func update(_ ingredients: [RecipeIngredient]) {

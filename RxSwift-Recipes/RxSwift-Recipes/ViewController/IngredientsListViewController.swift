@@ -72,8 +72,8 @@ class IngredientsListViewController: UIViewController {
     
     // MARK: - Add Ingredient
     @objc private func didTapAddButton() {
-        let formVC = IngredientFormViewController { [weak self] ingredient in
-            self?.viewModel.add(ingredient)
+        let formVC = IngredientFormViewController { [weak self] in
+            self?.viewModel.fetch()
         }
         
         presentMediumModal(formVC)
@@ -81,7 +81,7 @@ class IngredientsListViewController: UIViewController {
     
     // MARK: - Edit Ingredient
     private func presentEditIngredientForm(for ingredient: RecipeIngredient) {
-        let formVC = IngredientFormViewController(completion: { [weak self] _ in
+        let formVC = IngredientFormViewController(completion: { [weak self] in
             self?.viewModel.update()
         }, ingredient: ingredient)
         

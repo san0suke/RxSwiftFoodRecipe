@@ -21,13 +21,6 @@ class IngredientsListViewModel {
         ingredients.accept(ingredientDAO.fetchAll())
     }
     
-    // MARK: - Add Ingredient
-    func add(_ ingredient: RecipeIngredient) {
-        if ingredientDAO.insert(ingredient) {
-            fetch()
-        }
-    }
-    
     // MARK: - Update Ingredient
     func update() {
         if ingredientDAO.saveContext() {

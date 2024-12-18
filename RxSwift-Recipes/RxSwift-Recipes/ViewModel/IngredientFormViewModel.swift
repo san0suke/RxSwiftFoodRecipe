@@ -11,6 +11,8 @@ import RxCocoa
 
 class IngredientFormViewModel {
     
+    private let ingredientDAO: RecipeIngredientDAO
+    
     // MARK: - Inputs
     let ingredientName = BehaviorRelay<String>(value: "")
     
@@ -19,7 +21,9 @@ class IngredientFormViewModel {
     private var ingredient: RecipeIngredient?
     
     // MARK: - Initialization
-    init(ingredient: RecipeIngredient? = nil) {
+    init(ingredientDAO: RecipeIngredientDAO = RecipeIngredientDAO(),
+        ingredient: RecipeIngredient? = nil) {
+        self.ingredientDAO = ingredientDAO
         self.ingredient = ingredient
         self.isEditing = ingredient != nil
         
@@ -29,9 +33,8 @@ class IngredientFormViewModel {
     }
     
     // MARK: - Create or Update Ingredient
-    func getUpdatedIngredient() -> RecipeIngredient {
-        let ingredientToReturn = ingredient ?? RecipeIngredient(entity: RecipeIngredient.entity(), insertInto: nil)
+    func save() {
+        let ingredientToReturn = ingredient ?? ingredientDAO.createInstance()
         ingredientToReturn.name = ingredientName.value
-        return ingredientToReturn
     }
 }

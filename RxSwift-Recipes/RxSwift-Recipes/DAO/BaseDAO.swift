@@ -17,12 +17,6 @@ class BaseDAO {
         self.context = context
     }
     
-    // MARK: - Insert
-    func insert(_ object: NSManagedObject) -> Bool {
-        context.insert(object)
-        return saveContext()
-    }
-
     // MARK: - Delete
     func delete(_ object: NSManagedObject) -> Bool {
         context.delete(object)
