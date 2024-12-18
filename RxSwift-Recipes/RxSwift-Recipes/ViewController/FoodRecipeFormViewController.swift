@@ -71,8 +71,19 @@ class FoodRecipeFormViewController: UIViewController {
     
     // MARK: - RxSwift
     private let disposeBag = DisposeBag()
-    private let viewModel = FoodRecipeFormViewModel()
-    private let selectedIngredientsRelay = BehaviorRelay<[RecipeIngredient]>(value: [])
+    private let viewModel: FoodRecipeFormViewModel
+    private let completion: () -> Void
+    
+    // MARK: - Initialization
+    init(completion: @escaping () -> Void, foodRecipe: FoodRecipe? = nil) {
+        self.completion = completion
+        self.viewModel = FoodRecipeFormViewModel(foodRecipe: foodRecipe)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     
@@ -148,7 +159,7 @@ class FoodRecipeFormViewController: UIViewController {
             .bind(to: viewModel.recipeName)
             .disposed(by: disposeBag)
         
-        selectedIngredientsRelay
+        viewModel.selectedIngredientsRelay
             .bind(to: ingredientsTableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
                 cell.textLabel?.text = ingredient.name ?? "Unnamed Ingredient"
             }
@@ -158,9 +169,10 @@ class FoodRecipeFormViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func onSelectIngredientTap() {
-        let viewController = SelectIngredientViewController(selected: selectedIngredientsRelay.value) { [weak self] ingredients in
+        let viewController = SelectIngredientViewController(selected: viewModel.selectedIngredientsRelay.value) { [weak self] ingredients in
             guard let self = self else { return }
-            self.selectedIngredientsRelay.accept(ingredients)
+            
+            viewModel.update(ingredients)
         }
         
         presentMediumModal(viewController)
@@ -168,7 +180,8 @@ class FoodRecipeFormViewController: UIViewController {
     
     @objc private func didTapSaveButton() {
         if viewModel.save() {
-            dismiss(animated: true)
+            completion()
+            navigationController?.popViewController(animated: true)
         }
     }
 }

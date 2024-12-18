@@ -15,14 +15,22 @@ class FoodRecipeFormViewModel {
     var foodRecipe: FoodRecipe?
     
     let recipeName = BehaviorRelay<String>(value: "")
+    let selectedIngredientsRelay = BehaviorRelay<[RecipeIngredient]>(value: [])
     
-    init(foodRecipeDAO: FoodRecipeDAO = FoodRecipeDAO()) {
+    init(foodRecipe: FoodRecipe? = nil, foodRecipeDAO: FoodRecipeDAO = FoodRecipeDAO()) {
         self.foodRecipeDAO = foodRecipeDAO
+        self.foodRecipe = foodRecipe
     }
     
     func save() -> Bool {
-        print("Recipe: \(recipeName.value)")
-        return false
-//        return foodRecipeDAO.insert(recipe)
+        let foodRecipe = foodRecipe ?? FoodRecipe(entity: FoodRecipe.entity(), insertInto: CoreDataManager.shared.persistentContainer.viewContext)
+        foodRecipe.name = recipeName.value
+        foodRecipe.ingredients = NSSet(array: selectedIngredientsRelay.value)
+        
+        return foodRecipeDAO.insert(foodRecipe)
+    }
+    
+    func update(_ ingredients: [RecipeIngredient]) {
+        self.selectedIngredientsRelay.accept(ingredients)
     }
 }
