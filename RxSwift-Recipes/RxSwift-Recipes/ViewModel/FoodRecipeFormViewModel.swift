@@ -38,6 +38,14 @@ class FoodRecipeFormViewModel {
         }
     }
     
+    func delete(_ ingredient: RecipeIngredient) {
+        var currentIngredients = selectedIngredientsRelay.value
+        
+        currentIngredients.removeAll { $0 == ingredient }
+        
+        selectedIngredientsRelay.accept(currentIngredients)
+    }
+    
     func save() {
         let foodRecipe = foodRecipe ?? foodRecipeDAO.createInstance()
         foodRecipe.name = recipeName.value

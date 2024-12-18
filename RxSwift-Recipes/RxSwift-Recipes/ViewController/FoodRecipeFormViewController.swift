@@ -179,6 +179,13 @@ class FoodRecipeFormViewController: UIViewController {
         viewModel.isSaveButtonEnabled
             .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
+        
+        ingredientsTableView.rx.modelDeleted(RecipeIngredient.self)
+            .subscribe { [weak self] ingredient in
+                self?.viewModel.delete(ingredient)
+            }
+            .disposed(by: disposeBag)
+
     }
     
     // MARK: - Actions
