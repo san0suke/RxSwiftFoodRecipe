@@ -9,6 +9,10 @@ import CoreData
 
 class FoodRecipeDAO: BaseDAO {
     
+    func createInstance() -> FoodRecipe {
+        FoodRecipe(entity: FoodRecipe.entity(), insertInto: CoreDataManager.shared.persistentContainer.viewContext)
+    }
+    
     // MARK: - Fetch All
     func fetchAll() -> [FoodRecipe] {
         let fetchRequest: NSFetchRequest<FoodRecipe> = FoodRecipe.fetchRequest()

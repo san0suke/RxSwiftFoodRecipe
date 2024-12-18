@@ -69,10 +69,15 @@ class FoodRecipeFormViewController: UIViewController {
         return tableView
     }()
     
+    private let saveButton: UIBarButtonItem = {
+        UIBarButtonItem(title: "Save", style: .done, target: nil, action: nil)
+    }()
+    
+    private let completion: () -> Void
+    
     // MARK: - RxSwift
     private let disposeBag = DisposeBag()
     private let viewModel: FoodRecipeFormViewModel
-    private let completion: () -> Void
     
     // MARK: - Initialization
     init(completion: @escaping () -> Void, foodRecipe: FoodRecipe? = nil) {
@@ -147,10 +152,16 @@ class FoodRecipeFormViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(didTapSaveButton))
+        navigationItem.rightBarButtonItem = saveButton
     }
     
     private func bindViews() {
+        saveButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.didTapSaveButton()
+            })
+            .disposed(by: disposeBag)
+        
         viewModel.recipeName
             .bind(to: nameTextField.rx.text)
             .disposed(by: disposeBag)
@@ -163,6 +174,10 @@ class FoodRecipeFormViewController: UIViewController {
             .bind(to: ingredientsTableView.rx.items(cellIdentifier: "IngredientCell")) { _, ingredient, cell in
                 cell.textLabel?.text = ingredient.name ?? "Unnamed Ingredient"
             }
+            .disposed(by: disposeBag)
+        
+        viewModel.isSaveButtonEnabled
+            .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
     }
     

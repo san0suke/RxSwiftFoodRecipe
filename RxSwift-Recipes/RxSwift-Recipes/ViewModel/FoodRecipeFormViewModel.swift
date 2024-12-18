@@ -17,13 +17,21 @@ class FoodRecipeFormViewModel {
     let recipeName = BehaviorRelay<String>(value: "")
     let selectedIngredientsRelay = BehaviorRelay<[RecipeIngredient]>(value: [])
     
+    lazy var isSaveButtonEnabled: Observable<Bool> = {
+        return Observable.combineLatest(recipeName, selectedIngredientsRelay)
+            .map { name, ingredients in
+                return !name.isEmpty && !ingredients.isEmpty
+            }
+            .distinctUntilChanged()
+    }()
+    
     init(foodRecipe: FoodRecipe? = nil, foodRecipeDAO: FoodRecipeDAO = FoodRecipeDAO()) {
         self.foodRecipeDAO = foodRecipeDAO
         self.foodRecipe = foodRecipe
     }
     
     func save() -> Bool {
-        let foodRecipe = foodRecipe ?? FoodRecipe(entity: FoodRecipe.entity(), insertInto: CoreDataManager.shared.persistentContainer.viewContext)
+        let foodRecipe = foodRecipe ?? foodRecipeDAO.createInstance()
         foodRecipe.name = recipeName.value
         foodRecipe.ingredients = NSSet(array: selectedIngredientsRelay.value)
         
