@@ -68,9 +68,10 @@ class IngredientFormViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func didTapSaveButton() {
-        viewModel.save()
-        completion()
-        dismiss(animated: true, completion: nil)
+        if viewModel.save() {
+            completion()
+            dismiss(animated: true, completion: nil)
+        }
     }
 
     @objc private func didTapCancelButton() {

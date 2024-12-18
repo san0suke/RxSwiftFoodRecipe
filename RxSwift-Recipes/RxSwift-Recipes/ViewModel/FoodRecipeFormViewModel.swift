@@ -33,7 +33,7 @@ class FoodRecipeFormViewModel {
             recipeName.accept(foodRecipe.name ?? "")
             
             if let ingredients = foodRecipe.ingredients as? Set<RecipeIngredient> {
-                selectedIngredientsRelay.accept(Array(ingredients))
+                update(Array(ingredients))
             }
         }
     }
@@ -46,13 +46,16 @@ class FoodRecipeFormViewModel {
         selectedIngredientsRelay.accept(currentIngredients)
     }
     
-    func save() {
+    func save() -> Bool {
         let foodRecipe = foodRecipe ?? foodRecipeDAO.createInstance()
         foodRecipe.name = recipeName.value
         foodRecipe.ingredients = NSSet(array: selectedIngredientsRelay.value)
+        
+        return foodRecipeDAO.saveContext()
     }
     
     func update(_ ingredients: [RecipeIngredient]) {
-        self.selectedIngredientsRelay.accept(ingredients)
+        let sortedIngredients = ingredients.sorted { ($0.name ?? "") < ($1.name ?? "") }
+        self.selectedIngredientsRelay.accept(sortedIngredients)
     }
 }

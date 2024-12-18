@@ -202,9 +202,10 @@ class FoodRecipeFormViewController: UIViewController {
     }
     
     @objc private func didTapSaveButton() {
-        viewModel.save()
-        completion()
-        navigationController?.popViewController(animated: true)
+        if viewModel.save() {
+            completion()
+            navigationController?.popViewController(animated: true)
+        }
     }
     
     private func openSelectIngredientModal() {

@@ -33,8 +33,10 @@ class IngredientFormViewModel {
     }
     
     // MARK: - Create or Update Ingredient
-    func save() {
+    func save() -> Bool {
         let ingredientToReturn = ingredient ?? ingredientDAO.createInstance()
         ingredientToReturn.name = ingredientName.value
+        
+        return ingredientDAO.saveContext()
     }
 }
