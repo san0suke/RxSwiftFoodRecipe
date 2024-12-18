@@ -185,12 +185,29 @@ class FoodRecipeFormViewController: UIViewController {
                 self?.viewModel.delete(ingredient)
             }
             .disposed(by: disposeBag)
+        
+        ingredientsTableView.rx
+            .modelSelected(RecipeIngredient.self)
+            .subscribe { [weak self] _ in
+                self?.openSelectIngredientModal()
+            }
+            .disposed(by: disposeBag)
 
     }
     
     // MARK: - Actions
     
     @objc private func onSelectIngredientTap() {
+        openSelectIngredientModal()
+    }
+    
+    @objc private func didTapSaveButton() {
+        viewModel.save()
+        completion()
+        navigationController?.popViewController(animated: true)
+    }
+    
+    private func openSelectIngredientModal() {
         let viewController = SelectIngredientViewController(selected: viewModel.selectedIngredientsRelay.value) { [weak self] ingredients in
             guard let self = self else { return }
             
@@ -198,11 +215,5 @@ class FoodRecipeFormViewController: UIViewController {
         }
         
         presentMediumModal(viewController)
-    }
-    
-    @objc private func didTapSaveButton() {
-        viewModel.save()
-        completion()
-        navigationController?.popViewController(animated: true)
     }
 }
