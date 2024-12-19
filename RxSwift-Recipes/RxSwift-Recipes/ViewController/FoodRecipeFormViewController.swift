@@ -209,7 +209,7 @@ class FoodRecipeFormViewController: UIViewController {
     }
     
     private func openSelectIngredientModal() {
-        let viewController = SelectIngredientViewController(selected: viewModel.selectedIngredientsRelay.value) { [weak self] ingredients in
+        let viewController = SelectIngredientViewController(selectedIngredients: viewModel.selectedIngredientsRelay.value) { [weak self] ingredients in
             guard let self = self else { return }
             
             viewModel.update(ingredients)

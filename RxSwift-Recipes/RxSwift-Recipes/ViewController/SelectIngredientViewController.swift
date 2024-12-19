@@ -7,19 +7,22 @@
 
 import UIKit
 import CoreData
+import RxSwift
+import RxCocoa
 
 class SelectIngredientViewController: UIViewController {
     
     // MARK: - UI Components
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private var ingredients: [RecipeIngredient] = []
-    private var selectedIngredients: Set<RecipeIngredient> = []
     
+    //MARK: - Properties
+    private let disposeBag = DisposeBag()
     private let completion: ([RecipeIngredient]) -> Void
+    private let viewModel: SelectIngredientViewModel
     
     // MARK: - Initialization
-    init(selected: [RecipeIngredient] = [], completion: @escaping ([RecipeIngredient]) -> Void) {
-        self.selectedIngredients = Set(selected)
+    init(selectedIngredients: [RecipeIngredient] = [], completion: @escaping ([RecipeIngredient]) -> Void) {
+        self.viewModel = SelectIngredientViewModel(selectedIngredients: selectedIngredients)
         self.completion = completion
         super.init(nibName: nil, bundle: nil)
     }
@@ -36,15 +39,14 @@ class SelectIngredientViewController: UIViewController {
         
         setupTableView()
         setupNavigationBar()
-        fetchIngredients()
+        bindTableView()
+        viewModel.fetch()
     }
     
     // MARK: - Setup UI
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "IngredientCell")
-        tableView.delegate = self
-        tableView.dataSource = self
         
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
@@ -60,22 +62,33 @@ class SelectIngredientViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(didTapCancelButton))
     }
     
-    // MARK: - Fetch Ingredients
-    private func fetchIngredients() {
-        let context = CoreDataManager.shared.persistentContainer.viewContext
-        let fetchRequest: NSFetchRequest<RecipeIngredient> = RecipeIngredient.fetchRequest()
+    private func bindTableView() {
+        Observable.combineLatest(viewModel.ingredients, viewModel.selectedIngredients)
+            .map { $0.0 }
+            .bind(to: tableView.rx.items(cellIdentifier: "IngredientCell")) { [weak self] _, ingredient, cell in
+                guard let self = self else { return }
+                
+                cell.textLabel?.text = ingredient.name
+                
+                if self.viewModel.contains(ingredient) {
+                    cell.accessoryType = .checkmark
+                } else {
+                    cell.accessoryType = .none
+                }
+            }
+            .disposed(by: disposeBag)
         
-        do {
-            ingredients = try context.fetch(fetchRequest)
-            tableView.reloadData()
-        } catch {
-            print("Failed to fetch ingredients: \(error)")
-        }
+        tableView.rx.modelSelected(RecipeIngredient.self)
+            .subscribe { [weak self] ingredient in
+                self?.viewModel.onRowPressed(ingredient)
+            }
+            .disposed(by: disposeBag)
     }
     
     // MARK: - Actions
     @objc private func didTapDoneButton() {
-        completion(Array(selectedIngredients))
+        completion(Array(viewModel.selectedIngredients.value))
+        
         dismiss(animated: true)
     }
     
@@ -83,44 +96,3 @@ class SelectIngredientViewController: UIViewController {
         dismiss(animated: true)
     }
 }
-
-// MARK: - UITableViewDataSource & UITableViewDelegate
-extension SelectIngredientViewController: UITableViewDataSource, UITableViewDelegate {
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return ingredients.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "IngredientCell", for: indexPath)
-        let ingredient = ingredients[indexPath.row]
-        
-        cell.textLabel?.text = ingredient.name ?? "Unnamed Ingredient"
-        
-        if selectedIngredients.contains(ingredient) {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let ingredient = ingredients[indexPath.row]
-        
-        if selectedIngredients.contains(ingredient) {
-            selectedIngredients.remove(ingredient)
-        } else {
-            selectedIngredients.insert(ingredient)
-        }
-        
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-}
-
