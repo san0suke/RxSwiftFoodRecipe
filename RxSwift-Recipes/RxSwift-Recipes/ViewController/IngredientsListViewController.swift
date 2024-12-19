@@ -48,21 +48,18 @@ class IngredientsListViewController: UIViewController {
     
     // MARK: - Bind TableView
     private func bindTableView() {
-        // Binding: ViewModel -> TableView
         viewModel.ingredients
             .bind(to: tableView.rx.items(cellIdentifier: "Cell")) { _, ingredient, cell in
                 cell.textLabel?.text = ingredient.name
             }
             .disposed(by: disposeBag)
         
-        // Handling delete action
         tableView.rx.modelDeleted(RecipeIngredient.self)
             .subscribe(onNext: { [weak self] ingredient in
                 self?.viewModel.delete(ingredient)
             })
             .disposed(by: disposeBag)
         
-        // Handling row selection for editing
         tableView.rx.modelSelected(RecipeIngredient.self)
             .subscribe(onNext: { [weak self] ingredient in
                 self?.presentEditIngredientForm(for: ingredient)
@@ -82,7 +79,7 @@ class IngredientsListViewController: UIViewController {
     // MARK: - Edit Ingredient
     private func presentEditIngredientForm(for ingredient: RecipeIngredient) {
         let formVC = IngredientFormViewController(completion: { [weak self] in
-            self?.viewModel.update()
+            self?.viewModel.fetch()
         }, ingredient: ingredient)
         
         presentMediumModal(formVC)

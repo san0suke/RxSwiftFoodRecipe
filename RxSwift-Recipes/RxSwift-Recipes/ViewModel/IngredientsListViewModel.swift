@@ -21,13 +21,6 @@ class IngredientsListViewModel {
         ingredients.accept(ingredientDAO.fetchAll())
     }
     
-    // MARK: - Update Ingredient
-    func update() {
-        if ingredientDAO.saveContext() {
-            fetch()
-        }
-    }
-    
     // MARK: - Delete Ingredient
     func delete(_ ingredient: RecipeIngredient) {
         if ingredientDAO.delete(ingredient) {
