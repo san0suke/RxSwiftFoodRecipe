@@ -13,6 +13,12 @@ class IngredientFormViewModel {
     
     private let ingredientDAO: RecipeIngredientDAO
     
+    private(set) lazy var isSaveButtonEnabled: Observable<Bool> = {
+        return ingredientName
+            .map { !$0.isEmpty }
+            .distinctUntilChanged()
+    }()
+    
     // MARK: - Inputs
     let ingredientName = BehaviorRelay<String>(value: "")
     

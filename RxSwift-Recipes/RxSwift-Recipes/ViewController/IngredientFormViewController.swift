@@ -23,6 +23,8 @@ class IngredientFormViewController: UIViewController {
         return textField
     }()
     
+    private var saveButton: UIBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: nil, action: nil)
+    
     // MARK: - Initialization
     init(completion: @escaping () -> Void, ingredient: RecipeIngredient? = nil) {
         self.completion = completion
@@ -46,9 +48,9 @@ class IngredientFormViewController: UIViewController {
     
     private func setupUI() {
         view.addSubview(textField)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(didTapSaveButton))
+        navigationItem.rightBarButtonItem = saveButton
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(didTapCancelButton))
-
+        
         NSLayoutConstraint.activate([
             textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -64,10 +66,20 @@ class IngredientFormViewController: UIViewController {
         textField.rx.text.orEmpty
             .bind(to: viewModel.ingredientName)
             .disposed(by: disposeBag)
+        
+        saveButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.didTapSaveButton()
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.isSaveButtonEnabled
+            .bind(to: saveButton.rx.isEnabled)
+            .disposed(by: disposeBag)
     }
 
     // MARK: - Actions
-    @objc private func didTapSaveButton() {
+    private func didTapSaveButton() {
         if viewModel.save() {
             completion()
             dismiss(animated: true, completion: nil)
