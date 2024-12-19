@@ -11,10 +11,13 @@ import CoreData
 
 class IngredientsListViewModel {
     
-    private let ingredientDAO = RecipeIngredientDAO()
+    private let ingredientDAO: RecipeIngredientDAO
     
-    // Observable com os ingredientes
     let ingredients: BehaviorRelay<[RecipeIngredient]> = BehaviorRelay(value: [])
+    
+    init(ingredientDAO: RecipeIngredientDAO) {
+        self.ingredientDAO = ingredientDAO
+    }
     
     // MARK: - Fetch Ingredients
     func fetch() {

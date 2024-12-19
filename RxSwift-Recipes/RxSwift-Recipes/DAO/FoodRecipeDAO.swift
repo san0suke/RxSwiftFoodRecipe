@@ -7,7 +7,12 @@
 
 import CoreData
 
-class FoodRecipeDAO: BaseDAO {
+protocol FoodRecipeDAOProtocol {
+    func createInstance() -> FoodRecipe
+    func fetchAll() -> [FoodRecipe]
+}
+
+class FoodRecipeDAO: BaseDAO, FoodRecipeDAOProtocol {
     
     func createInstance() -> FoodRecipe {
         FoodRecipe(entity: FoodRecipe.entity(), insertInto: context)

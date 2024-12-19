@@ -7,7 +7,12 @@
 
 import CoreData
 
-class BaseDAO {
+protocol BaseDAOProtocol {
+    func delete(_ object: NSManagedObject) -> Bool
+    func saveContext() -> Bool
+}
+
+class BaseDAO: BaseDAOProtocol {
     
     // MARK: - Properties
     let context: NSManagedObjectContext
