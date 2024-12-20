@@ -13,7 +13,7 @@ class IngredientsListViewController: UIViewController {
     
     private var tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
     private let disposeBag = DisposeBag()
-    private let viewModel = IngredientsListViewModel()
+    private let viewModel: IngredientsListViewModelProtocol = IngredientsListViewModel()
 
     override func viewDidLoad() {
         super.viewDidLoad()

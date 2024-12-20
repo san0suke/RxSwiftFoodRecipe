@@ -11,6 +11,7 @@
 		8A6D935B2D10AFB8008209E5 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 8A6D935A2D10AFB8008209E5 /* RxCocoa */; };
 		8A6D935D2D10AFB8008209E5 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 8A6D935C2D10AFB8008209E5 /* RxRelay */; };
 		8A6D935F2D10AFB8008209E5 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8A6D935E2D10AFB8008209E5 /* RxSwift */; };
+		8A6D93D22D15A3D4008209E5 /* RxTest in Frameworks */ = {isa = PBXBuildFile; productRef = 8A6D93D12D15A3D4008209E5 /* RxTest */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A6D93D22D15A3D4008209E5 /* RxTest in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +173,7 @@
 			);
 			name = "RxSwift-RecipesTests";
 			packageProductDependencies = (
+				8A6D93D12D15A3D4008209E5 /* RxTest */,
 			);
 			productName = "RxSwift-RecipesTests";
 			productReference = 8A6D93022D0C81F6008209E5 /* RxSwift-RecipesTests.xctest */;
@@ -621,6 +624,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8A6D93562D10AFAA008209E5 /* XCRemoteSwiftPackageReference "RxSwift" */;
 			productName = RxSwift;
+		};
+		8A6D93D12D15A3D4008209E5 /* RxTest */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8A6D93562D10AFAA008209E5 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxTest;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

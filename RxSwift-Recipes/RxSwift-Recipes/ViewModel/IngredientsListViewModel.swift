@@ -9,11 +9,17 @@ import RxSwift
 import RxCocoa
 import CoreData
 
-class IngredientsListViewModel {
+protocol IngredientsListViewModelProtocol {
+    var ingredients: BehaviorRelay<[RecipeIngredient]> { get set }
+    func fetch()
+    func delete(_ ingredient: RecipeIngredient)
+}
+
+class IngredientsListViewModel: IngredientsListViewModelProtocol {
     
     private let ingredientDAO: RecipeIngredientDAOProtocol
     
-    let ingredients: BehaviorRelay<[RecipeIngredient]> = BehaviorRelay(value: [])
+    var ingredients: BehaviorRelay<[RecipeIngredient]> = BehaviorRelay(value: [])
     
     init(ingredientDAO: RecipeIngredientDAOProtocol = RecipeIngredientDAO()) {
         self.ingredientDAO = ingredientDAO
