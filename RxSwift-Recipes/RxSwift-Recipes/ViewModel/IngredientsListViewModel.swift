@@ -11,11 +11,11 @@ import CoreData
 
 class IngredientsListViewModel {
     
-    private let ingredientDAO: RecipeIngredientDAO
+    private let ingredientDAO: RecipeIngredientDAOProtocol
     
     let ingredients: BehaviorRelay<[RecipeIngredient]> = BehaviorRelay(value: [])
     
-    init(ingredientDAO: RecipeIngredientDAO) {
+    init(ingredientDAO: RecipeIngredientDAOProtocol = RecipeIngredientDAO()) {
         self.ingredientDAO = ingredientDAO
     }
     
