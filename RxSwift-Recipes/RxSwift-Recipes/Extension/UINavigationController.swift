@@ -1,5 +1,5 @@
 //
-//  UIViewController.swift
+//  UINavigationController.swift
 //  RxSwift-Recipes
 //
 //  Created by Robson Cesar de Siqueira on 16/12/24.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension UIViewController {
+extension UINavigationController {
     
     func presentMediumModal(_ viewController: UIViewController) {
         let navigationController = UINavigationController(rootViewController: viewController)

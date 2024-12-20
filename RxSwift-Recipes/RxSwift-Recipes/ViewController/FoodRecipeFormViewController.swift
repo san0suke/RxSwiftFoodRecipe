@@ -215,6 +215,6 @@ class FoodRecipeFormViewController: UIViewController {
             viewModel.update(ingredients)
         }
         
-        presentMediumModal(viewController)
+        navigationController?.presentMediumModal(viewController)
     }
 }

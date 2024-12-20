@@ -78,7 +78,7 @@ class MainViewController: UIViewController {
     }
     
     @objc private func onTapIngredients() {
-        navigationController?.pushViewController(IngredientsListViewController(), animated: true)
+        navigationController?.pushViewController(IngredientListViewController(), animated: true)
     }
     
     @objc private func onTapRecipes() {

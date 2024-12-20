@@ -1,5 +1,5 @@
 //
-//  IngredientsListViewController.swift
+//  IngredientListViewController.swift
 //  RxSwift-Recipes
 //
 //  Created by Robson Cesar de Siqueira on 13/12/24.
@@ -9,22 +9,28 @@ import UIKit
 import RxSwift
 import RxCocoa
 
-class IngredientsListViewController: UIViewController {
+class IngredientListViewController: UIViewController {
     
     private var tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
     private let disposeBag = DisposeBag()
     private let viewModel: IngredientsListViewModelProtocol = IngredientsListViewModel()
+    var coordinator: IngredientListCoordinatorProtocol = IngredientListCoordinator()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         title = "Ingredients"
         
+        setupCoordinator()
         setupTableView()
         setupNavigationBar()
         bindTableView()
         
         viewModel.fetch()
+    }
+    
+    private func setupCoordinator() {
+        coordinator.navigationController = navigationController
     }
     
     // MARK: - Setup UI
@@ -62,26 +68,19 @@ class IngredientsListViewController: UIViewController {
         
         tableView.rx.modelSelected(RecipeIngredient.self)
             .subscribe(onNext: { [weak self] ingredient in
-                self?.presentEditIngredientForm(for: ingredient)
+                self?.presentIngredientForm(for: ingredient)
             })
             .disposed(by: disposeBag)
     }
     
     // MARK: - Add Ingredient
     @objc private func didTapAddButton() {
-        let formVC = IngredientFormViewController { [weak self] in
-            self?.viewModel.fetch()
-        }
-        
-        presentMediumModal(formVC)
+        presentIngredientForm(for: nil)
     }
     
-    // MARK: - Edit Ingredient
-    private func presentEditIngredientForm(for ingredient: RecipeIngredient) {
-        let formVC = IngredientFormViewController(completion: { [weak self] in
+    private func presentIngredientForm(for ingredient: RecipeIngredient?) {
+        coordinator.presentIngredientForm(for: ingredient) { [weak self] in
             self?.viewModel.fetch()
-        }, ingredient: ingredient)
-        
-        presentMediumModal(formVC)
+        }
     }
 }
