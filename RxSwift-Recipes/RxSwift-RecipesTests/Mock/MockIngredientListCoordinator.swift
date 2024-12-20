@@ -12,13 +12,9 @@ class MockIngredientListCoordinator: IngredientListCoordinatorProtocol {
     
     var navigationController: UINavigationController?
     
-    var presentIngredientFormCalled = false
-    var presentedIngredient: RecipeIngredient?
-    var presentIngredientFormCompletion: (() -> Void)?
+    var presentIngredientFormCompletion: ((_ ingredient: RecipeIngredient?, _ completion: () -> Void) -> Void)?
     
     func presentIngredientForm(for ingredient: RecipeIngredient?, completion: @escaping () -> Void) {
-        presentIngredientFormCalled = true
-        presentedIngredient = ingredient
-        presentIngredientFormCompletion = completion
+        presentIngredientFormCompletion?(ingredient, completion)
     }
 }

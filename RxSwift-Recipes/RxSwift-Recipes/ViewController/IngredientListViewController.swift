@@ -11,11 +11,25 @@ import RxCocoa
 
 class IngredientListViewController: UIViewController {
     
-    private var tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped)
+    private var tableView: UITableView
     private let disposeBag = DisposeBag()
-    private let viewModel: IngredientsListViewModelProtocol = IngredientsListViewModel()
-    var coordinator: IngredientListCoordinatorProtocol = IngredientListCoordinator()
-
+    private let viewModel: IngredientsListViewModelProtocol
+    private var coordinator: IngredientListCoordinatorProtocol
+    
+    init(tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped),
+         viewModel: IngredientsListViewModelProtocol = IngredientsListViewModel(),
+         coordinator: IngredientListCoordinatorProtocol = IngredientListCoordinator()) {
+        self.tableView = tableView
+        self.viewModel = viewModel
+        self.coordinator = coordinator
+        
+        super.init()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
