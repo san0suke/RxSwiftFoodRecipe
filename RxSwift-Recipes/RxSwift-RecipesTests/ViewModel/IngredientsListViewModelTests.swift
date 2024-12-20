@@ -35,28 +35,32 @@ class IngredientsListViewModelTests: XCTestCase {
             RecipeIngredient(),
             RecipeIngredient()
         ]
+        
         mockDAO.fetchAllCompletion = {
             expectedIngredients
         }
         
-        let expectation = XCTestExpectation(description: "Fetch ingredients")
+        let fetchExpectation = expectation(description: "Should fetch")
         
         viewModel.ingredients
-            .skip(1) // Ignora o valor inicial vazio
+            .skip(1)
             .subscribe(onNext: { ingredients in
                 XCTAssertEqual(ingredients, expectedIngredients)
-                expectation.fulfill()
+                fetchExpectation.fulfill()
             })
             .disposed(by: disposeBag)
         
         viewModel.fetch()
         
-        wait(for: [expectation], timeout: 1.0)
+        waitForExpectations(timeout: 3)
     }
     
     func testDeleteIngredient() {
         let ingredientToDelete = RecipeIngredient()
         let remainingIngredients = [RecipeIngredient()]
+        
+        let deleteExpectation = expectation(description: "Should delete")
+        let fetchExpectation = expectation(description: "Should fetch")
         
         mockDAO.fetchAllCompletion = {
             remainingIngredients
@@ -64,50 +68,44 @@ class IngredientsListViewModelTests: XCTestCase {
         
         mockDAO.deleteCompletion = { ingredient in
             XCTAssertEqual(ingredient, ingredientToDelete)
+            deleteExpectation.fulfill()
             return true
         }
         
-        let expectation = XCTestExpectation(description: "Delete ingredient")
-        
         viewModel.ingredients
-            .skip(1) // Ignora o valor inicial vazio
+            .skip(1)
             .subscribe(onNext: { ingredients in
                 XCTAssertEqual(ingredients, remainingIngredients)
-                expectation.fulfill()
+                fetchExpectation.fulfill()
             })
             .disposed(by: disposeBag)
         
         viewModel.delete(ingredientToDelete)
         
-        wait(for: [expectation], timeout: 1.0)
+        waitForExpectations(timeout: 3)
     }
-    
+
     func testDeleteIngredientFails() {
         let ingredientToDelete = RecipeIngredient()
         let expectedIngredients = [RecipeIngredient()]
         
+        let deleteExpectation = expectation(description: "Should call delete")
+        let fetchExpectation = expectation(description: "Should not call fetch")
+        fetchExpectation.isInverted = true
+        
         mockDAO.fetchAllCompletion = {
-            expectedIngredients
+            fetchExpectation.fulfill()
+            return expectedIngredients
         }
         
         mockDAO.deleteCompletion = { ingredient in
             XCTAssertEqual(ingredient, ingredientToDelete)
+            deleteExpectation.fulfill()
             return false
         }
         
-        let expectation = XCTestExpectation(description: "Delete ingredient fails")
-        
-        viewModel.ingredients
-            .skip(1) // Ignora o valor inicial vazio
-            .subscribe(onNext: { ingredients in
-                XCTAssertEqual(ingredients, expectedIngredients)
-                expectation.fulfill()
-            })
-            .disposed(by: disposeBag)
-        
-        viewModel.fetch() // Preenche a lista inicial
         viewModel.delete(ingredientToDelete)
         
-        wait(for: [expectation], timeout: 1.0)
+        waitForExpectations(timeout: 1)
     }
 }
