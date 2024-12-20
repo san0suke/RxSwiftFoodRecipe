@@ -11,19 +11,29 @@ import RxCocoa
 
 class IngredientListViewController: UIViewController {
     
-    private var tableView: UITableView
+    private var coordinator: IngredientListCoordinatorProtocol
+    
+    private let tableView: UITableView
     private let disposeBag = DisposeBag()
     private let viewModel: IngredientsListViewModelProtocol
-    private var coordinator: IngredientListCoordinatorProtocol
+    private let addButtonTappedRelay: PublishRelay<Void>
+    private let modelDeletedRelay: PublishRelay<RecipeIngredient>
+    private let modelSelectedRelay: PublishRelay<RecipeIngredient>
     
     init(tableView: UITableView = UITableView(frame: .zero, style: .insetGrouped),
          viewModel: IngredientsListViewModelProtocol = IngredientsListViewModel(),
-         coordinator: IngredientListCoordinatorProtocol = IngredientListCoordinator()) {
+         coordinator: IngredientListCoordinatorProtocol = IngredientListCoordinator(),
+         addButtonTappedRelay: PublishRelay<Void> = PublishRelay<Void>(),
+         modelDeletedRelay: PublishRelay<RecipeIngredient> = PublishRelay<RecipeIngredient>(),
+         modelSelectedRelay: PublishRelay<RecipeIngredient> = PublishRelay<RecipeIngredient>()) {
         self.tableView = tableView
         self.viewModel = viewModel
         self.coordinator = coordinator
+        self.addButtonTappedRelay = addButtonTappedRelay
+        self.modelDeletedRelay = modelDeletedRelay
+        self.modelSelectedRelay = modelSelectedRelay
         
-        super.init()
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -32,24 +42,27 @@ class IngredientListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupCoordinator()
+        setupUI()
+        setupBindings()
+        viewModel.fetch()
+    }
+    
+    private func setupUI() {
         view.backgroundColor = .white
         title = "Ingredients"
         
-        setupCoordinator()
-        setupTableView()
         setupNavigationBar()
-        bindTableView()
-        
-        viewModel.fetch()
+        setupTableView()
     }
     
     private func setupCoordinator() {
         coordinator.navigationController = navigationController
     }
     
-    // MARK: - Setup UI
     private func setupNavigationBar() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddButton))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
     }
 
     private func setupTableView() {
@@ -62,12 +75,21 @@ class IngredientListViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
     
-    // MARK: - Bind TableView
-    private func bindTableView() {
+    private func setupBindings() {
+        navigationItem.rightBarButtonItem?.rx.tap
+            .bind(to: addButtonTappedRelay)
+            .disposed(by: disposeBag)
+        
+        addButtonTappedRelay
+            .subscribe(onNext: { [weak self] in
+                self?.presentIngredientForm(for: nil)
+            })
+            .disposed(by: disposeBag)
+        
         viewModel.ingredients
             .bind(to: tableView.rx.items(cellIdentifier: "Cell")) { _, ingredient, cell in
                 cell.textLabel?.text = ingredient.name
@@ -75,21 +97,24 @@ class IngredientListViewController: UIViewController {
             .disposed(by: disposeBag)
         
         tableView.rx.modelDeleted(RecipeIngredient.self)
+            .bind(to: modelDeletedRelay)
+            .disposed(by: disposeBag)
+        
+        modelDeletedRelay
             .subscribe(onNext: { [weak self] ingredient in
                 self?.viewModel.delete(ingredient)
             })
             .disposed(by: disposeBag)
         
         tableView.rx.modelSelected(RecipeIngredient.self)
+            .bind(to: modelSelectedRelay)
+            .disposed(by: disposeBag)
+        
+        modelSelectedRelay
             .subscribe(onNext: { [weak self] ingredient in
                 self?.presentIngredientForm(for: ingredient)
             })
             .disposed(by: disposeBag)
-    }
-    
-    // MARK: - Add Ingredient
-    @objc private func didTapAddButton() {
-        presentIngredientForm(for: nil)
     }
     
     private func presentIngredientForm(for ingredient: RecipeIngredient?) {

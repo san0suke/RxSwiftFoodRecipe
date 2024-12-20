@@ -8,6 +8,7 @@
 import XCTest
 import RxSwift
 import RxCocoa
+import RxTest
 @testable import RxSwift_Recipes
 
 class IngredientListViewControllerTests: XCTestCase {
@@ -15,87 +16,115 @@ class IngredientListViewControllerTests: XCTestCase {
     var viewController: IngredientListViewController!
     var mockViewModel: MockIngredientsListViewModel!
     var mockCoordinator: MockIngredientListCoordinator!
-    var mockTableView: UITableView!
+    var tableView: UITableView!
+    var addButtonTappedRelay: PublishRelay<Void>!
+    var modelDeletedRelay: PublishRelay<RecipeIngredient>!
+    var modelSelectedRelay: PublishRelay<RecipeIngredient>!
     var disposeBag: DisposeBag!
-    
+
     override func setUp() {
         super.setUp()
-        
         mockViewModel = MockIngredientsListViewModel()
         mockCoordinator = MockIngredientListCoordinator()
-        mockTableView = UITableView()
+        tableView = UITableView()
+        addButtonTappedRelay = PublishRelay<Void>()
+        modelDeletedRelay = PublishRelay<RecipeIngredient>()
+        modelSelectedRelay = PublishRelay<RecipeIngredient>()
         disposeBag = DisposeBag()
-        
+
         viewController = IngredientListViewController(
-            tableView: mockTableView,
+            tableView: tableView,
             viewModel: mockViewModel,
-            coordinator: mockCoordinator
+            coordinator: mockCoordinator,
+            addButtonTappedRelay: addButtonTappedRelay,
+            modelDeletedRelay: modelDeletedRelay,
+            modelSelectedRelay: modelSelectedRelay
         )
-        
-        viewController.loadViewIfNeeded()
     }
-    
+
     override func tearDown() {
         viewController = nil
         mockViewModel = nil
         mockCoordinator = nil
-        mockTableView = nil
+        tableView = nil
+        addButtonTappedRelay = nil
+        modelDeletedRelay = nil
+        modelSelectedRelay = nil
         disposeBag = nil
         super.tearDown()
     }
-    
-    func testViewDidLoad_TriggersFetchOnViewModel() {
-        var fetchCalled = false
+
+    func testFetchIngredientsOnViewDidLoad() {
+        let fetchExpectation = expectation(description: "Fetch ingredients should be called")
         
         mockViewModel.fetchCompletion = {
-            fetchCalled = true
+            fetchExpectation.fulfill()
         }
         
-        viewController.viewDidLoad()
-        
-        XCTAssertTrue(fetchCalled, "fetch() should be called when viewDidLoad is executed")
-    }
-    
-    func testDidTapAddButton_CallsCoordinatorPresentIngredientForm() {
-        let expectation = expectation(description: "Coordinator's presentIngredientForm should be called")
-        
-        mockCoordinator.presentIngredientFormCompletion = { ingredient, completion in
-            XCTAssertNil(ingredient, "Ingredient should be nil when adding a new ingredient")
-            completion()
-            expectation.fulfill()
-        }
-        
-        viewController.didTapAddButton()
+        triggerViewDidLoad()
         
         waitForExpectations(timeout: 1)
     }
+
+    func testAddButtonTapped() {
+        let addButtonExpectation = expectation(description: "Add button should trigger coordinator")
+        
+        mockCoordinator.presentIngredientFormCompletion = { ingredient, completion in
+            XCTAssertNil(ingredient)
+            addButtonExpectation.fulfill()
+            completion()
+        }
+        
+        triggerViewDidLoad()
+        
+        addButtonTappedRelay.accept(())
+        
+        waitForExpectations(timeout: 1)
+    }
+
+    func testModelDeleted() {
+        let ingredient = RecipeIngredient()
+        let deleteExpectation = expectation(description: "Delete should trigger viewModel.delete")
+        
+        mockViewModel.deleteCompletion = { deletedIngredient in
+            XCTAssertEqual(deletedIngredient, ingredient)
+            deleteExpectation.fulfill()
+        }
+        
+        triggerViewDidLoad()
+        
+        modelDeletedRelay.accept(ingredient)
+        
+        waitForExpectations(timeout: 1)
+    }
+
+    func testModelSelected() {
+        let ingredient = RecipeIngredient()
+        let selectExpectation = expectation(description: "Selecting an ingredient should trigger coordinator")
+        
+        mockCoordinator.presentIngredientFormCompletion = { selectedIngredient, completion in
+            XCTAssertEqual(selectedIngredient, ingredient)
+            selectExpectation.fulfill()
+            completion()
+        }
+        
+        triggerViewDidLoad()
+        
+        modelSelectedRelay.accept(ingredient)
+        
+        waitForExpectations(timeout: 1)
+    }
+
+    func testTableViewBinding() {
+        let testIngredients = [RecipeIngredient(), RecipeIngredient()]
+        mockViewModel.ingredients.accept(testIngredients)
+        
+        triggerViewDidLoad()
+        
+        XCTAssertEqual(tableView.numberOfRows(inSection: 0), testIngredients.count)
+    }
     
-//    func testModelDeleted_CallsViewModelDelete() {
-//        let testIngredient = RecipeIngredient()
-//        let expectation = expectation(description: "ViewModel's delete should be called")
-//        
-//        mockViewModel.deleteCompletion = { ingredient in
-//            XCTAssertEqual(ingredient, testIngredient, "The deleted ingredient should match the selected one")
-//            expectation.fulfill()
-//        }
-//        
-//        mockTableView.rx.modelDeleted(RecipeIngredient.self).onNext(testIngredient)
-//        
-//        waitForExpectations(timeout: 1)
-//    }
-//    
-//    func testModelSelected_CallsCoordinatorPresentIngredientForm() {
-//        let testIngredient = RecipeIngredient()
-//        let expectation = expectation(description: "Coordinator's presentIngredientForm should be called with the selected ingredient")
-//        
-//        mockCoordinator.presentIngredientFormCompletion = { ingredient, completion in
-//            XCTAssertEqual(ingredient, testIngredient, "The selected ingredient should be passed to the coordinator")
-//            completion()
-//            expectation.fulfill()
-//        }
-//        
-//        mockTableView.rx.modelSelected(RecipeIngredient.self).onNext(testIngredient)
-//        
-//        waitForExpectations(timeout: 1)
-//    }
+    private func triggerViewDidLoad() {
+        _ = viewController.view
+    }
 }
