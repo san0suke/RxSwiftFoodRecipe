@@ -10,8 +10,7 @@ import UIKit
 
 class MockIngredientListCoordinator: IngredientListCoordinatorProtocol {
     
-    var navigationController: UINavigationController?
-    
+    var navigationController: UINavigationControllerProtocol?
     var presentIngredientFormCompletion: ((_ ingredient: RecipeIngredient?, _ completion: () -> Void) -> Void)?
     
     func presentIngredientForm(for ingredient: RecipeIngredient?, completion: @escaping () -> Void) {

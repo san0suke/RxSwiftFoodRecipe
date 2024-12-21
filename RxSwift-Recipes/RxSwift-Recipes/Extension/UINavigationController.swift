@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension UINavigationController {
+extension UINavigationController: UINavigationControllerProtocol {
     
     func presentMediumModal(_ viewController: UIViewController) {
         let navigationController = UINavigationController(rootViewController: viewController)

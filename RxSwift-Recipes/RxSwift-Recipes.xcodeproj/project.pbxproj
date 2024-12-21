@@ -38,24 +38,27 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		8A6D93142D0C81F6008209E5 /* Exceptions for "RxSwift-Recipes" folder in "RxSwift-Recipes" target */ = {
+		8A6D94602D17394B008209E5 /* Exceptions for "RxSwift-Recipes" folder in "RxSwift-Recipes" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				RxSwift_Recipes.xcdatamodeld,
 			);
 			target = 8A6D92E82D0C81F2008209E5 /* RxSwift-Recipes */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		8A6D92EB2D0C81F2008209E5 /* RxSwift-Recipes */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				8A6D93142D0C81F6008209E5 /* Exceptions for "RxSwift-Recipes" folder in "RxSwift-Recipes" target */,
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		8A6D94612D17394B008209E5 /* Exceptions for "RxSwift-Recipes" folder in "Compile Sources" phase from "RxSwift-Recipes" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 8A6D92E52D0C81F2008209E5 /* Sources */;
+			membershipExceptions = (
+				RxSwift_Recipes.xcdatamodeld,
 			);
-			path = "RxSwift-Recipes";
-			sourceTree = "<group>";
 		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
 		8A6D93052D0C81F6008209E5 /* RxSwift-RecipesTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "RxSwift-RecipesTests";
@@ -64,6 +67,15 @@
 		8A6D930F2D0C81F6008209E5 /* RxSwift-RecipesUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "RxSwift-RecipesUITests";
+			sourceTree = "<group>";
+		};
+		8A6D94482D17394B008209E5 /* RxSwift-Recipes */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8A6D94602D17394B008209E5 /* Exceptions for "RxSwift-Recipes" folder in "RxSwift-Recipes" target */,
+				8A6D94612D17394B008209E5 /* Exceptions for "RxSwift-Recipes" folder in "Compile Sources" phase from "RxSwift-Recipes" target */,
+			);
+			path = "RxSwift-Recipes";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -101,7 +113,7 @@
 		8A6D92E02D0C81F2008209E5 = {
 			isa = PBXGroup;
 			children = (
-				8A6D92EB2D0C81F2008209E5 /* RxSwift-Recipes */,
+				8A6D94482D17394B008209E5 /* RxSwift-Recipes */,
 				8A6D93052D0C81F6008209E5 /* RxSwift-RecipesTests */,
 				8A6D930F2D0C81F6008209E5 /* RxSwift-RecipesUITests */,
 				8A6D93572D10AFB8008209E5 /* Frameworks */,
@@ -142,7 +154,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				8A6D92EB2D0C81F2008209E5 /* RxSwift-Recipes */,
+				8A6D94482D17394B008209E5 /* RxSwift-Recipes */,
 			);
 			name = "RxSwift-Recipes";
 			packageProductDependencies = (

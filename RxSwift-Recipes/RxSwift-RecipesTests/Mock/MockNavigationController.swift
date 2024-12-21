@@ -6,22 +6,28 @@
 //
 
 import UIKit
+@testable import RxSwift_Recipes
 
-class MockNavigationController: UINavigationController {
+class MockNavigationController: UINavigationControllerProtocol {
     
     var pushViewControllerCompletion: ((_ viewController: UIViewController, _ animated: Bool) -> Void)?
     var presentViewControllerCompletion: ((_ viewControllerToPresent: UIViewController, _ animated: Bool, _ completion: (() -> Void)?) -> Void)?
     var dismissCompletion: ((_ animated: Bool, _ completion: (() -> Void)?) -> Void)?
+    var presentMediumModalCompletion: ((_ viewController: UIViewController) -> Void)?
     
-    override func pushViewController(_ viewController: UIViewController, animated: Bool) {
+    func pushViewController(_ viewController: UIViewController, animated: Bool) {
         pushViewControllerCompletion?(viewController, animated)
     }
     
-    override func present(_ viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)? = nil) {
+    func present(_ viewControllerToPresent: UIViewController, animated: Bool, completion: (() -> Void)?) {
         presentViewControllerCompletion?(viewControllerToPresent, animated, completion)
     }
     
-    override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+    func dismiss(animated flag: Bool, completion: (() -> Void)?) {
         dismissCompletion?(flag, completion)
+    }
+    
+    func presentMediumModal(_ viewController: UIViewController) {
+        presentMediumModalCompletion?(viewController)
     }
 }
